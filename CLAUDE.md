@@ -14,7 +14,13 @@ bun run build                            # tsc -> dist/
 bun run src/index.ts search "关键词"      # run from source
 ```
 
-There are no tests yet. Quick smoke test (hits live Sogou):
+Tests (vitest; run via `rtk vitest run` — the globalSetup rebuilds `dist/` first):
+
+```bash
+rtk vitest run                 # unit + e2e (e2e uses a local mock server, no live Sogou)
+```
+
+Occasional smoke test against live Sogou (keep volume low):
 
 ```bash
 node dist/index.js search "人工智能" | head -20
@@ -22,10 +28,16 @@ node dist/index.js search "人工智能" | head -20
 
 ## Architecture
 
-Two source files under `src/`:
+Source files under `src/`:
 
-- `index.ts` — bin entry (`#!/usr/bin/env node`). Subcommand parsing via `node:util` `parseArgs` with `allowPositionals`. Commands: `search <query> [--page]`, `search-all <query> [--max-pages]`, `content <real_url> [--referer]`. Search commands print pretty JSON; `content` prints plain text. All failures exit 1 with the message on stderr. `search` runs in strict mode so anti-spider/network failures error out instead of printing `[]`.
-- `weixin-search.ts` — all scraping logic (cheerio + native fetch, 15s timeout via `AbortSignal.timeout`).
+- `index.ts` — bin entry (`#!/usr/bin/env node`). Subcommand parsing via `node:util` `parseArgs` with `allowPositionals`. Commands: `search <query> [--page]`, `search-all <query> [--max-pages]`, `content <real_url> [--referer]`, `skill` (prints the bundled SKILL.md, resolved relative to `import.meta.url`). Search commands print pretty JSON; `content` prints plain text. All failures exit 1 with the message on stderr. `search` runs in strict mode so anti-spider/network failures error out instead of printing `[]`.
+- `parsers.ts` — all pure parsing/extraction (cheerio, no network): anti-spider detection, session-cookie harvesting, publish-time normalization, search-page parsing, `url +=` redirect extraction, article text extraction. Unit tests target this module.
+- `search.ts` — network orchestration for search: fetch search page, resolve each `/link` redirect (`sogouWeixinSearch`, `sogouWeixinSearchAll`, `getRealUrlFromSogou`).
+- `content.ts` — `getArticleContent` (fetch article page, delegate parsing to parsers.ts).
+- `constants.ts` — timeout, browser UA, and `SOGOU_BASE_URL` (overridable via `WX_SOGOU_BASE_URL` env, which exists so e2e tests can point the flow at a local mock server — don't remove it).
+- `types.ts` — `WeixinSearchResult`.
+
+Tests under `tests/`: `unit/parsers.test.ts` (fixture-driven, `tests/fixtures/*.html`), `e2e/cli.test.ts` (runs `dist/index.js` as a child process against a `node:http` mock that reproduces Sogou's cookie-gated `/link` behavior — it serves a captcha page unless the session cookies from the search response are echoed back, so the happy-path test proves cookie forwarding end-to-end).
 
 ### Scraping flow and its load-bearing hacks
 

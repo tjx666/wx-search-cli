@@ -73,6 +73,9 @@ bun run src/index.ts search "关键词"
 
 # build
 bun run build
+
+# run tests (unit + e2e; e2e uses a local mock server, no live requests)
+bun run test
 ```
 
 ## Notes

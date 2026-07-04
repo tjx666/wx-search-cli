@@ -4,11 +4,8 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 
-import {
-    getArticleContent,
-    sogouWeixinSearch,
-    sogouWeixinSearchAll,
-} from './weixin-search.js';
+import { getArticleContent } from './content.js';
+import { sogouWeixinSearch, sogouWeixinSearchAll } from './search.js';
 
 export const CLI_NAME = 'wx-search-cli';
 export const CLI_VERSION = '0.1.0';
