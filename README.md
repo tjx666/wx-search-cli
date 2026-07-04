@@ -52,6 +52,14 @@ Search multiple pages with automatic pagination (~10 results per page, 1s delay 
 
 Fetch the main body text of a WeChat article and print it as plain text. Pass the `real_url` field from search results as the argument, and ideally the `link` field via `--referer`.
 
+#### `skill`
+
+Print the bundled [SKILL.md](./SKILL.md) — an [agent skill](https://docs.claude.com/en/docs/claude-code/skills) document teaching AI agents how to use this CLI. Useful for self-serve onboarding:
+
+```bash
+npx wx-search-cli skill
+```
+
 Failures exit with code 1 and an error message on stderr, so scripts can rely on exit codes.
 
 ## Development
