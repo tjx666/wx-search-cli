@@ -1,5 +1,9 @@
 # wx-search-cli
 
+[![CI](https://github.com/tjx666/wx-search-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/tjx666/wx-search-cli/actions/workflows/ci.yml)
+[![Live](https://github.com/tjx666/wx-search-cli/actions/workflows/live.yml/badge.svg)](https://github.com/tjx666/wx-search-cli/actions/workflows/live.yml)
+[![npm](https://img.shields.io/npm/v/wx-search-cli)](https://www.npmjs.com/package/wx-search-cli)
+
 A command-line tool for searching and reading WeChat official account (公众号) articles, powered by Sogou WeChat search. Results are printed as JSON / plain text to stdout, so it works great as a tool for AI agents (Claude Code, etc.) or in shell pipelines.
 
 ## Acknowledgements
@@ -74,8 +78,12 @@ bun run src/index.ts search "关键词"
 # build
 bun run build
 
-# run tests (unit + e2e; e2e uses a local mock server, no live requests)
+# run tests (unit + CLI basics; no live requests)
 bun run test
+
+# live smoke tests against real Sogou (one search + one article fetch;
+# excluded from the default test run to avoid tripping the captcha)
+bun run test:live
 ```
 
 ## Notes

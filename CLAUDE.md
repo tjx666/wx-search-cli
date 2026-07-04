@@ -17,14 +17,11 @@ bun run src/index.ts search "关键词"      # run from source
 Tests (vitest; run via `rtk vitest run` — the globalSetup rebuilds `dist/` first):
 
 ```bash
-rtk vitest run                 # unit + e2e (e2e uses a local mock server, no live Sogou)
+rtk vitest run                                        # unit + cli-basics, no network
+rtk vitest run --config vitest.live.config.ts         # live tests against REAL Sogou
 ```
 
-Occasional smoke test against live Sogou (keep volume low):
-
-```bash
-node dist/index.js search "人工智能" | head -20
-```
+Live tests are the source of truth for "does scraping still work"; they are opt-in (excluded from the default run) so day-to-day loops don't trip Sogou's captcha. CI (`.github/workflows/ci.yml`, the README badge) runs only the offline suite; `live.yml` runs the live suite on a daily cron + manual dispatch — a live failure can mean Sogou changed markup OR the runner IP got rate-limited, check the assertion message.
 
 ## Architecture
 
@@ -34,10 +31,10 @@ Source files under `src/`:
 - `parsers.ts` — all pure parsing/extraction (cheerio, no network): anti-spider detection, session-cookie harvesting, publish-time normalization, search-page parsing, `url +=` redirect extraction, article text extraction. Unit tests target this module.
 - `search.ts` — network orchestration for search: fetch search page, resolve each `/link` redirect (`sogouWeixinSearch`, `sogouWeixinSearchAll`, `getRealUrlFromSogou`).
 - `content.ts` — `getArticleContent` (fetch article page, delegate parsing to parsers.ts).
-- `constants.ts` — timeout, browser UA, and `SOGOU_BASE_URL` (overridable via `WX_SOGOU_BASE_URL` env, which exists so e2e tests can point the flow at a local mock server — don't remove it).
+- `constants.ts` — timeout, browser UA, `SOGOU_BASE_URL`.
 - `types.ts` — `WeixinSearchResult`.
 
-Tests under `tests/`: `unit/parsers.test.ts` (fixture-driven, `tests/fixtures/*.html`), `e2e/cli.test.ts` (runs `dist/index.js` as a child process against a `node:http` mock that reproduces Sogou's cookie-gated `/link` behavior — it serves a captcha page unless the session cookies from the search response are echoed back, so the happy-path test proves cookie forwarding end-to-end).
+Tests under `tests/`: `unit/parsers.test.ts` (fixture-driven, `tests/fixtures/*.html`), `e2e/cli-basics.test.ts` (child-process CLI runs, no network), `live/sogou.test.ts` (real Sogou requests: one search page + one article fetch — keep its footprint small).
 
 ### Scraping flow and its load-bearing hacks
 

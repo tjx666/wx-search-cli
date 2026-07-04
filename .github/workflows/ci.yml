@@ -1,0 +1,17 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      # unit + cli-basics only; live Sogou tests run in live.yml so this
+      # badge reflects code health, not Sogou's mood towards CI runner IPs
+      - run: bun run test
