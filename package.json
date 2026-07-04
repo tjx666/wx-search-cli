@@ -1,0 +1,43 @@
+{
+  "name": "wx-search-cli",
+  "version": "0.1.0",
+  "description": "CLI for searching and reading WeChat official account (公众号) articles via Sogou WeChat search",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "wx-search-cli": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.17"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "bun run src/index.ts",
+    "prepublishOnly": "bun run build"
+  },
+  "keywords": [
+    "cli",
+    "weixin",
+    "wechat",
+    "sogou",
+    "search",
+    "crawler"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tjx666/wx-search-cli.git"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.8.0"
+  }
+}
